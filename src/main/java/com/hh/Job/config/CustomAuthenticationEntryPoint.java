@@ -11,6 +11,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @Component
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
@@ -31,7 +32,12 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
         RestResponse<Object> res = new RestResponse<>();
         res.setStatusCode(HttpStatus.UNAUTHORIZED.value());
-        res.setError(authException.getMessage()); // tránh NullPointer
+
+        String errorMessage = Optional.ofNullable(authException.getCause())
+                        .map(Throwable::getMessage)
+                        .orElse(authException.getMessage());
+
+        res.setError(errorMessage); // tránh NullPointer
         res.setMessage("Token không hợp lệ (hết hạn hoặc sai định dạng)");
 
         objectMapper.writeValue(response.getWriter(), res);

@@ -2,6 +2,7 @@ package com.hh.Job.util;
 
 
 import com.hh.Job.domain.RestResponse;
+import com.hh.Job.util.annotation.APImessage;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
@@ -41,7 +42,8 @@ public class FormatRestResponse implements ResponseBodyAdvice {
             return body;
         }else{
             restResponse.setData(body);
-            restResponse.setMessage("success");
+            APImessage message = returnType.getMethodAnnotation(APImessage.class);
+            restResponse.setMessage(message != null ? message.value() :  "success");
         }
         return restResponse;
     }

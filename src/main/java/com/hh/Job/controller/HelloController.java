@@ -7,7 +7,7 @@ import com.hh.Job.util.error.IdInvalidException;
 @RestController
 public class HelloController {
 
-    @GetMapping("/hello")
+    @GetMapping("/")
     public String hello() {
         return "Hello, World!";
     }
