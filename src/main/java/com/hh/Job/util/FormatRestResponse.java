@@ -1,7 +1,7 @@
 package com.hh.Job.util;
 
 
-import com.hh.Job.domain.RestResponse;
+import com.hh.Job.domain.response.RestResponse;
 import com.hh.Job.util.annotation.APImessage;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.core.MethodParameter;

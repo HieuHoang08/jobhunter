@@ -1,46 +1,45 @@
 package com.hh.Job.domain;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.hh.Job.util.constant.GenderEnum;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.time.Instant;
 
 @Entity
 @Table(name = "users")
+@Getter
+@Setter
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String username;
+
+    private String name;
+    @NotBlank(message = "password khong duoc de trong")
     private String password;
+    @NotBlank(message = "email khong duoc de trong")
     private String email;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public Long getId() {
-        return id;
-    }
-    public void setUsername(String username) {
-        this.username = username;
-    }
+    private int age;
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    @Enumerated(EnumType.STRING)
+    private GenderEnum gender;
+    private String address;
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String refreshToken;
 
-    public String getUsername() {
-        return username;
-    }
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss a", timezone = "GTM + 7")
+    private Instant createdAt;
+    private Instant updatedAt;
+    private String createdBy;
+    private String updatedBy;
 
-    public String getPassword() {
-        return password;
-    }
 
-    public String getEmail() {
-        return email;
-    }
 }

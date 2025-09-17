@@ -1,5 +1,6 @@
-package com.hh.Job.service;
+package com.hh.Job.config;
 
+import com.hh.Job.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;

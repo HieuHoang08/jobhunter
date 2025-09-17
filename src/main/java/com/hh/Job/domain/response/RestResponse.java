@@ -1,4 +1,4 @@
-package com.hh.Job.domain;
+package com.hh.Job.domain.response;
 
 public class RestResponse<T> {
     private int statusCode;

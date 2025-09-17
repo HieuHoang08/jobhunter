@@ -2,7 +2,7 @@ package com.hh.Job.controller;
 
 
 import com.hh.Job.domain.Company;
-import com.hh.Job.domain.dto.ResultPaginationDTO;
+import com.hh.Job.domain.response.ResultPaginationDTO;
 import com.hh.Job.service.CompanyService;
 import com.hh.Job.util.annotation.APImessage;
 import com.turkraft.springfilter.boot.Filter;

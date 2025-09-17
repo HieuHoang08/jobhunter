@@ -2,16 +2,13 @@ package com.hh.Job.service;
 
 
 import com.hh.Job.domain.Company;
-import com.hh.Job.domain.User;
-import com.hh.Job.domain.dto.Meta;
-import com.hh.Job.domain.dto.ResultPaginationDTO;
+import com.hh.Job.domain.response.ResultPaginationDTO;
 import com.hh.Job.repository.CompanyRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -47,7 +44,7 @@ public class CompanyService {
     public ResultPaginationDTO fetchAllCompany(Specification<Company> spec, Pageable pageable) {
         Page<Company> pageUser = this.companyRepository.findAll(spec,pageable);
         ResultPaginationDTO resultPaginationDTO = new ResultPaginationDTO();
-        Meta meta = new Meta();
+        ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
 
         meta.setPage(pageable.getPageNumber() + 1);
         meta.setPageSize(pageable.getPageSize());
