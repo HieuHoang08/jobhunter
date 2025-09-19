@@ -3,7 +3,7 @@ package com.hh.Job.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.hh.Job.util.SecurityUtil;
-import com.hh.Job.util.constant.GenderEnum;
+import com.hh.Job.domain.constant.GenderEnum;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;

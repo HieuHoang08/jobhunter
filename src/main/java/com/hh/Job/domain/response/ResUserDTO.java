@@ -1,6 +1,6 @@
 package com.hh.Job.domain.response;
 
-import com.hh.Job.util.constant.GenderEnum;
+import com.hh.Job.domain.constant.GenderEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

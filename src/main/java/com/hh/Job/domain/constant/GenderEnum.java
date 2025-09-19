@@ -1,4 +1,4 @@
-package com.hh.Job.util.constant;
+package com.hh.Job.domain.constant;
 
 public enum GenderEnum {
 
