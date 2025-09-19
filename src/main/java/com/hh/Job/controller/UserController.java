@@ -3,6 +3,7 @@ package com.hh.Job.controller;
 
 import com.hh.Job.domain.User;
 import com.hh.Job.domain.response.ResCreateUserDTO;
+import com.hh.Job.domain.response.ResUpdateUserDTO;
 import com.hh.Job.domain.response.ResUserDTO;
 import com.hh.Job.domain.response.ResultPaginationDTO;
 import com.hh.Job.service.UserService;
@@ -40,7 +41,7 @@ public class UserController {
         boolean isEmailExit = this.userService.isEmailExists(user.getEmail());
         if (isEmailExit) {
             throw new IdInvalidException(
-                    "Email" + user.getEmail() + " da ton tai, vui long xu dung email khax"
+                    "Email" + user.getEmail() + " da ton tai, vui long xu dung email khac"
             );
         }
 
@@ -78,14 +79,14 @@ public class UserController {
 
     @PutMapping("/users")
     @APImessage("Update a user")
-    public ResponseEntity<ResCreateUserDTO> updateUser(@RequestBody User user)
+    public ResponseEntity<ResUpdateUserDTO> updateUser(@RequestBody User user)
     throws IdInvalidException {
-        User h2User = this.userService.updateUser(user);
+        User h2User = this.userService.handleUpdateUser(user);
         if(h2User == null) {
             throw new IdInvalidException("User voi id " + user.getId() + " khong ton tai");
         }
 
-        return ResponseEntity.ok(this.userService.convertToRestCreateUserDTO(h2User));
+        return ResponseEntity.ok(this.userService.convertToRestUpdateUserDTO(h2User));
     }
 
 

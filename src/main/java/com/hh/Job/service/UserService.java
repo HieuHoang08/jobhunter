@@ -1,6 +1,7 @@
 package com.hh.Job.service;
 
 
+import com.hh.Job.domain.Company;
 import com.hh.Job.domain.User;
 import com.hh.Job.domain.response.ResCreateUserDTO;
 import com.hh.Job.domain.response.ResUpdateUserDTO;
@@ -21,11 +22,22 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
-    public UserService(UserRepository userRepository) {
+    private final CompanyService companyService;
+
+
+    public UserService(UserRepository userRepository, CompanyService companyService) {
+
         this.userRepository = userRepository;
+        this.companyService = companyService;
     }
 
     public User handleCreateUser(User user) {
+        // check company
+        if(user.getCompany() != null){
+            Optional<Company> companyOptional = this.companyService.findById(user.getCompany());
+            user.setCompany(companyOptional.isPresent() ? companyOptional.get() : null);
+        }
+
         return this.userRepository.save(user);
     }
 
@@ -47,7 +59,7 @@ public class UserService {
 //        return pageUser.getContent();
 //    }
 
-    public User updateUser(User user) {
+    public User handleUpdateUser(User user) {
         User crrUser = this.fetchUserById(user.getId());
         if (crrUser != null) {
 
@@ -55,12 +67,20 @@ public class UserService {
             crrUser.setPassword(user.getPassword());
             crrUser.setEmail(user.getEmail());
 
+            // check company
+
+            if(user.getCompany() != null) {
+                Optional<Company> companyOptional = this.companyService.findById(user.getCompany());
+                user.setCompany(companyOptional.isPresent() ? companyOptional.get() : null);
+            }
+            //update
             crrUser = this.userRepository.save(crrUser);
         }
         return crrUser;
     }
 
     public User handleGetUserByUsername(String username) {
+
         return this.userRepository.findByEmail(username);
     }
 // phan trang theo pageable
@@ -103,7 +123,11 @@ public class UserService {
                         item.getAddress(),
                         item.getAge(),
                         item.getCreatedAt(),
-                        item.getUpdatedAt()
+                        item.getUpdatedAt(),
+                        new ResUserDTO.CompanyUser(
+                                item.getCompany() != null ? item.getCompany().getId() : 0,
+                                item.getCompany() != null ? item.getCompany().getName() : null
+                        )
                 ))
                 .collect(Collectors.toList());
 
@@ -117,16 +141,25 @@ public class UserService {
 
     public ResCreateUserDTO convertToRestCreateUserDTO (User user) {
         ResCreateUserDTO res = new ResCreateUserDTO();
+        ResCreateUserDTO.CompanyUser com = new ResCreateUserDTO.CompanyUser();
+
         res.setId(user.getId());
         res.setEmail(user.getEmail());
         res.setName(user.getName());
         res.setAge(user.getAge());
         res.setGender(user.getGender());
         res.setCreatedAt(user.getCreatedAt());
+        res.setAddress(user.getAddress());
+
+        if(user.getCompany() != null){
+            com.setId(user.getCompany().getId());
+            com.setName(user.getCompany().getName());
+            res.setCompany(com);
+        }
         return res;
     }
 
-    public ResUserDTO convertToRestUserDTO (User user) {
+    public ResUserDTO convertToRestUserDTO(User user) {
         ResUserDTO res = new ResUserDTO();
 
         res.setId(user.getId());
@@ -137,21 +170,40 @@ public class UserService {
         res.setCreatedAt(user.getCreatedAt());
         res.setAddress(user.getAddress());
         res.setUpdatedAt(user.getUpdatedAt());
-        return res;
 
+        // map company nếu có
+        if (user.getCompany() != null) {
+            ResUserDTO.CompanyUser companyUser = new ResUserDTO.CompanyUser();
+            companyUser.setId(user.getCompany().getId());
+            companyUser.setName(user.getCompany().getName());
+            res.setCompanyUser(companyUser);
+        }
+
+        return res;
     }
 
-    public ResUpdateUserDTO convertToRestUpdateUserDTO (User user) {
+
+    public ResUpdateUserDTO convertToRestUpdateUserDTO(User user) {
         ResUpdateUserDTO res = new ResUpdateUserDTO();
 
+        // map company nếu có
+        if (user.getCompany() != null) {
+            ResUpdateUserDTO.CompanyUser com = new ResUpdateUserDTO.CompanyUser();
+            com.setId(user.getCompany().getId());
+            com.setName(user.getCompany().getName());
+            res.setCompanyUser(com);
+        }
+
         res.setId(user.getId());
-        res.setUsername(user.getName());
+        res.setName(user.getName());         // ✅ sửa lại cho khớp DTO
         res.setAddress(user.getAddress());
         res.setAge(user.getAge());
         res.setGender(user.getGender());
         res.setUpdatedAt(user.getUpdatedAt());
+
         return res;
     }
+
 
     public void updateUserToken(String username, String token) {
         User crrUser = this.handleGetUserByUsername(username);
