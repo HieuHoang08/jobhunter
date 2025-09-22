@@ -1,4 +1,5 @@
-package com.hh.Job.domain.response;
+package com.hh.Job.domain.response.user;
+
 
 import com.hh.Job.domain.constant.GenderEnum;
 import lombok.Getter;
@@ -8,16 +9,14 @@ import java.time.Instant;
 
 @Getter
 @Setter
-public class ResCreateUserDTO {
-
+public class ResUpdateUserDTO {
     private long id;
     private String name;
-    private String email;
-    private String address;
     private GenderEnum gender;
+    private String address;
     private int age;
-    private Instant createdAt;
-    private CompanyUser company;
+    private Instant updatedAt;
+    private CompanyUser companyUser;
 
     @Getter
     @Setter

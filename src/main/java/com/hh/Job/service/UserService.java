@@ -3,9 +3,9 @@ package com.hh.Job.service;
 
 import com.hh.Job.domain.Company;
 import com.hh.Job.domain.User;
-import com.hh.Job.domain.response.ResCreateUserDTO;
-import com.hh.Job.domain.response.ResUpdateUserDTO;
-import com.hh.Job.domain.response.ResUserDTO;
+import com.hh.Job.domain.response.user.ResCreateUserDTO;
+import com.hh.Job.domain.response.user.ResUpdateUserDTO;
+import com.hh.Job.domain.response.user.ResUserDTO;
 import com.hh.Job.domain.response.ResultPaginationDTO;
 import com.hh.Job.repository.UserRepository;
 import org.springframework.data.domain.Page;
