@@ -1,5 +1,5 @@
+// AuthController.java
 package com.hh.Job.controller;
-
 
 import com.hh.Job.domain.User;
 import com.hh.Job.domain.request.ReqLoginDTO;
@@ -29,55 +29,43 @@ public class AuthController {
     private final SecurityUtil securityUtil;
     private final UserService userService;
 
-    public AuthController(AuthenticationManagerBuilder authenticationManagerBuilder, SecurityUtil securityUtil,
-                          UserService userService) {
+    public AuthController(AuthenticationManagerBuilder authenticationManagerBuilder, SecurityUtil securityUtil, UserService userService) {
         this.authenticationManagerBuilder = authenticationManagerBuilder;
         this.securityUtil = securityUtil;
         this.userService = userService;
-
     }
 
     @Value("${hh.jwt.refresh-token-validity-in-seconds}")
     private long refreshTokenExpiration;
 
     @PostMapping("/auth/login")
-    public ResponseEntity<ResLoginDTO> login(
-            @Valid
-            @RequestBody ReqLoginDTO reqLoginDto){
-        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken
-                (reqLoginDto.getUsername(), reqLoginDto.getPassword());
+    public ResponseEntity<ResLoginDTO> login(@Valid @RequestBody ReqLoginDTO reqLoginDto) {
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(reqLoginDto.getUsername(), reqLoginDto.getPassword());
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(token);
 
-        //creat token
+        // create token
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
         ResLoginDTO resLoginDTO = new ResLoginDTO();
         User crUserDb = userService.handleGetUserByUsername(reqLoginDto.getUsername());
-        // if(crUserDb != null){
-        //     ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin(
-        //     crUserDb.getId(),
-        //     crUserDb.getName(),
-        //     crUserDb.getEmail());
-        // }
 
         if (crUserDb == null) {
             // nếu user không tồn tại => trả lỗi
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        ResLoginDTO.UserLogin userLogin =
-                new ResLoginDTO.UserLogin(
-                    crUserDb.getId(),
-                    crUserDb.getName(),
-                    crUserDb.getEmail());
+        ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin(
+                crUserDb.getId(),
+                crUserDb.getName(),
+                crUserDb.getEmail());
         resLoginDTO.setUserLogin(userLogin);
 
-        String access_token = this.securityUtil.createAccessToken(authentication.getName(),resLoginDTO.getUserLogin());
+        String access_token = this.securityUtil.createAccessToken(authentication.getName(), resLoginDTO.getUserLogin());
         resLoginDTO.setAccessToken(access_token);
 
-        // creat refresh token
+        // create refresh token
         String refresh_token = this.securityUtil.createRefreshToken(reqLoginDto.getUsername(), resLoginDTO);
         resLoginDTO.setRefreshToken(refresh_token);
+
         // update user
         this.userService.updateUserToken(reqLoginDto.getUsername(), refresh_token);
 
@@ -88,25 +76,21 @@ public class AuthController {
                 .secure(true)
                 .path("/")
                 .maxAge(refreshTokenExpiration)
-
                 .build();
+
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, resCookies.toString()).body(resLoginDTO);
-
-
     }
-
 
     @GetMapping("/auth/account")
     @APImessage("fetch account")
-    public ResponseEntity<ResLoginDTO.UserGetAccount> getAccount(){
-        String email = SecurityUtil.getCurrentUserLogin().isPresent() ?
-                SecurityUtil.getCurrentUserLogin().get() : "";
-
+    public ResponseEntity<ResLoginDTO.UserGetAccount> getAccount() {
+        String email = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get() : "";
         User crrUserDB = userService.handleGetUserByUsername(email);
         ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin();
         ResLoginDTO.UserGetAccount userGetAcc = new ResLoginDTO.UserGetAccount();
-        if(crrUserDB != null){
+
+        if (crrUserDB != null) {
             userLogin.setId(crrUserDB.getId());
             userLogin.setEmail(crrUserDB.getEmail());
             userLogin.setUsername(crrUserDB.getName());
@@ -119,45 +103,41 @@ public class AuthController {
     @APImessage("Get User by refresh token")
     public ResponseEntity<ResLoginDTO> getRefreshToken(
             @CookieValue(name = "refresh_token", defaultValue = "hh") String refresh_token) throws IdInvalidException {
-
-        if(refresh_token.equals("hh")){
+        if (refresh_token.equals("hh")) {
             throw new IdInvalidException("ban khong co refresh token o day");
         }
 
-        //check valid
+        // check valid
         Jwt decodedToken = this.securityUtil.checkValidRefreshToken(refresh_token);
         String email = decodedToken.getSubject();
 
-        //check user by token + email
-
+        // check user by token + email
         User crrUser = this.userService.getUserByRefreshTokenAndEmail(refresh_token, email);
-        if(crrUser == null){
+        if (crrUser == null) {
             throw new IdInvalidException("Token khong hop le");
         }
-        //issue new token/set refresh token as cookies
+
+        // issue new token/set refresh token as cookies
         ResLoginDTO resLoginDTO = new ResLoginDTO();
         User crUserDb = userService.handleGetUserByUsername(email);
-//        if(crUserDb == null){
-//            ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin(crUserDb.getId(), crUserDb.getUsername(), crUserDb.getEmail());
-//        }
 
         if (crUserDb == null) {
             // nếu user không tồn tại => trả lỗi
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        ResLoginDTO.UserLogin userLogin =
-                new ResLoginDTO.UserLogin(crUserDb.getId(), crUserDb.getName(), crUserDb.getEmail());
+        ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin(crUserDb.getId(), crUserDb.getName(), crUserDb.getEmail());
         resLoginDTO.setUserLogin(userLogin);
 
-        String acess_token = this.securityUtil.createAccessToken(email,resLoginDTO.getUserLogin());
-        resLoginDTO.setAccessToken(acess_token);
+        String access_token = this.securityUtil.createAccessToken(email, resLoginDTO.getUserLogin());
+        resLoginDTO.setAccessToken(access_token);
 
-        // creat refresh token
+        // create refresh token
         String new_refresh_token = this.securityUtil.createRefreshToken(email, resLoginDTO);
-        resLoginDTO.setRefreshToken(refresh_token);
+        resLoginDTO.setRefreshToken(new_refresh_token); // FIX: Set new refresh token instead of old one
+
         // update user
-        this.userService.updateUserToken(email, refresh_token);
+        this.userService.updateUserToken(email, new_refresh_token); // FIX: Update with new refresh token
 
         // set cookies
         ResponseCookie resCookies = ResponseCookie
@@ -166,35 +146,32 @@ public class AuthController {
                 .secure(true)
                 .path("/")
                 .maxAge(refreshTokenExpiration)
-
                 .build();
+
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, resCookies.toString()).body(resLoginDTO);
-
     }
 
     @PostMapping("/auth/logout")
     @APImessage("ban da logout thanh cong")
     public ResponseEntity<Void> logout() throws IdInvalidException {
         String email = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get() : "";
-
-        if(email.equals("")){
+        if (email.equals("")) {
             throw new IdInvalidException(" access token khong hop le");
         }
 
         // update refresh token = null
         this.userService.updateUserToken(email, "");
+
         ResponseCookie resCookies = ResponseCookie
                 .from("refresh_token", null)
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
                 .maxAge(0)
-
                 .build();
+
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, resCookies.toString()).body(null);
-
-
     }
 }

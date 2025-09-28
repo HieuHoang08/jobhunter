@@ -44,11 +44,12 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/", "/api/v1/auth/login","api/v1/auth/refresh","/storage/**").permitAll()
+                        .requestMatchers("/", "/api/v1/auth/login","/api/v1/auth/refresh","/storage/**").permitAll()
                         .anyRequest().authenticated()
 
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults())
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
                         .authenticationEntryPoint(caep))
 //                .exceptionHandling(
 //                        exceptions -> exceptions
@@ -87,7 +88,7 @@ public class SecurityConfig {
 
     private SecretKey getSecretKey() {
         byte[] keyBytes = Base64.from(jwtKey).decode();
-        return new SecretKeySpec(keyBytes, 0, keyBytes.length, SecurityUtil.JWT_ALGORITHM.getName());
+        return new SecretKeySpec(keyBytes, 0, keyBytes.length, "HmacSHA512");
     }
 
     @Bean
